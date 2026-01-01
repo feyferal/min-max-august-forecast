@@ -32,13 +32,33 @@ def fetch_daily(
     r = requests.get(BASE_URL, params=params, timeout=60)
     r.raise_for_status()
     payload = r.json()
-    daily = payload["daily"]
 
-    df = pd.DataFrame(
-        {
-            "date": daily["time"],
-            "tmax": daily["temperature_2m_max"],
-            "tmin": daily["temperature_2m_min"],
-        }
-    )
-    return df
+    daily = payload.get("daily")
+    if not isinstance(daily, dict):
+        raise ValueError("Open-Meteo response has no 'daily' field")
+
+    time = daily.get("time")
+    tmax = daily.get("temperature_2m_max")
+    tmin = daily.get("temperature_2m_min")
+    if time is None or tmax is None or tmin is None:
+        raise ValueError("Open-Meteo response missing required daily keys")
+
+    if not (len(time) == len(tmax) == len(tmin)):
+        raise ValueError("Open-Meteo daily arrays have different lengths")
+
+    df = pd.DataFrame({"date": time, "tmax": tmax, "tmin": tmin})
+
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df["tmax"] = pd.to_numeric(df["tmax"], errors="coerce")
+    df["tmin"] = pd.to_numeric(df["tmin"], errors="coerce")
+    df = df.dropna(subset=["date", "tmax", "tmin"]).copy()
+
+    df = df.sort_values("date")
+    df = df.drop_duplicates(subset=["date"], keep="last")
+
+    df = df[df["tmax"] >= df["tmin"]]
+
+    if df.empty:
+        raise ValueError("No valid rows after cleaning Open-Meteo data")
+
+    return df.reset_index(drop=True)

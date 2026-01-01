@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 
 def load_daily_csv(path: str) -> pd.DataFrame:
@@ -37,6 +37,8 @@ def august_yearly_table(daily: pd.DataFrame, *, min_days_in_aug: int = 25) -> pd
     return g
 
 
-def q75(series: pd.Series) -> float:
+def quantile(series: pd.Series, q: float) -> float:
     x = series.dropna().to_numpy(dtype=float)
-    return float(np.quantile(x, 0.75))
+    if x.size == 0:
+        return float("nan")
+    return float(np.quantile(x, q))
