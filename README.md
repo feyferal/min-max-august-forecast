@@ -13,7 +13,9 @@ python -m venv .venv
 SETUP
 
 Create virtual environment:
+```
 python -m venv .venv
+```
 
 Activate virtual environment (Windows / PowerShell):
 ```
