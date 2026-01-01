@@ -10,13 +10,6 @@ CLI script that prints a table with **last 5 Augusts + 2026 forecast** for:
 python -m venv .venv
 ```
 
-SETUP
-
-Create virtual environment:
-```
-python -m venv .venv
-```
-
 Activate virtual environment (Windows / PowerShell):
 ```
 .\.venv\Scripts\activate
